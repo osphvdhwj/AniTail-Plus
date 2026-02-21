@@ -68,8 +68,16 @@ fun LibraryDownloadedScreen(
     val downloadRepository = LocalDownloadLibraryRepository.current
     val downloads by downloadRepository.observeDownloads().collectAsState()
     // Mostrar todos los downloads; para los sin song mapeado, usar metadata del archivo
-    val playableSongs = downloads.mapNotNull { downloadedTrack ->
-        downloadedTrack.song
+    val playableSongs = downloads.map { downloadedTrack ->
+        downloadedTrack.song ?: Song(
+            id = downloadedTrack.mediaStoreId.toString(),
+            title = downloadedTrack.title,
+            artistName = downloadedTrack.artist,
+            albumName = downloadedTrack.album,
+            duration = downloadedTrack.durationMs?.div(1000)?.toInt() ?: -1,
+            isLocal = true,
+            mediaStoreUri = downloadedTrack.mediaUri.toString()
+        )
     }
 
     val wrappedSongs = playableSongs.map { item -> ItemWrapper(item) }.toMutableList()

@@ -132,16 +132,30 @@ class DownloadLibraryRepository @Inject constructor(
         }.getOrDefault(emptyList())
         val songsByUri = songsWithUris.associateBy { it.song.mediaStoreUri }
 
-        val projection = arrayOf(
-            MediaStore.Audio.Media._ID,
-            MediaStore.Audio.Media.DISPLAY_NAME,
-            MediaStore.Audio.Media.TITLE,
-            MediaStore.Audio.Media.ARTIST,
-            MediaStore.Audio.Media.ALBUM,
-            MediaStore.Audio.Media.DURATION,
-            MediaStore.Audio.Media.SIZE,
-            MediaStore.Audio.Media.DATE_ADDED
-        )
+        val projection = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            arrayOf(
+                MediaStore.Audio.Media._ID,
+                MediaStore.Audio.Media.DISPLAY_NAME,
+                MediaStore.Audio.Media.TITLE,
+                MediaStore.Audio.Media.ARTIST,
+                MediaStore.Audio.Media.ALBUM,
+                MediaStore.Audio.Media.DURATION,
+                MediaStore.Audio.Media.SIZE,
+                MediaStore.Audio.Media.DATE_ADDED,
+                MediaStore.Audio.Media.RELATIVE_PATH
+            )
+        } else {
+            arrayOf(
+                MediaStore.Audio.Media._ID,
+                MediaStore.Audio.Media.DISPLAY_NAME,
+                MediaStore.Audio.Media.TITLE,
+                MediaStore.Audio.Media.ARTIST,
+                MediaStore.Audio.Media.ALBUM,
+                MediaStore.Audio.Media.DURATION,
+                MediaStore.Audio.Media.SIZE,
+                MediaStore.Audio.Media.DATE_ADDED
+            )
+        }
         val selection = null // Query all music, not just Anitail folder
         val selectionArgs = null
         val sortOrder = "${MediaStore.Audio.Media.DATE_ADDED} DESC"
@@ -163,6 +177,11 @@ class DownloadLibraryRepository @Inject constructor(
             val durationColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
             val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE)
             val dateAddedColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED)
+            val relativePathColumn = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.RELATIVE_PATH)
+            } else {
+                -1
+            }
 
             while (cursor.moveToNext()) {
                 val id = cursor.getLong(idColumn)
@@ -178,6 +197,11 @@ class DownloadLibraryRepository @Inject constructor(
                     .takeIf { it > 0 } else null
                 val dateAdded = if (!cursor.isNull(dateAddedColumn)) cursor.getLong(dateAddedColumn)
                     .takeIf { it > 0 } else null
+                val relativePath = if (relativePathColumn != -1 && !cursor.isNull(relativePathColumn)) {
+                    cursor.getString(relativePathColumn)
+                } else {
+                    null
+                }
 
                 result += DownloadedTrack(
                     mediaStoreId = id,
@@ -186,6 +210,7 @@ class DownloadLibraryRepository @Inject constructor(
                     title = title,
                     artist = artist,
                     album = album,
+                    relativePath = relativePath,
                     durationMs = duration,
                     sizeBytes = size,
                     dateAddedSeconds = dateAdded,
@@ -224,6 +249,7 @@ class DownloadLibraryRepository @Inject constructor(
                 title = song.song.title,
                 artist = song.song.artistName,
                 album = song.album?.title ?: song.song.albumName,
+                relativePath = null,
                 durationMs = song.song.duration.takeIf { it > 0 }?.times(1000L),
                 sizeBytes = null,
                 dateAddedSeconds = song.song.dateDownload?.toEpochSecond(ZoneOffset.UTC),
@@ -266,6 +292,7 @@ class DownloadLibraryRepository @Inject constructor(
         val title: String,
         val artist: String?,
         val album: String?,
+        val relativePath: String? = null,
         val durationMs: Long?,
         val sizeBytes: Long?,
         val dateAddedSeconds: Long?,
