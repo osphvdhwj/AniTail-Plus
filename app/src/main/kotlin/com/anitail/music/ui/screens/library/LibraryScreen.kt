@@ -29,6 +29,7 @@ fun LibraryScreen(navController: NavController) {
                     LibraryFilter.ALBUMS to stringResource(R.string.filter_albums),
                     LibraryFilter.ARTISTS to stringResource(R.string.filter_artists),
                     LibraryFilter.DOWNLOADED to stringResource(R.string.filter_downloaded),
+                    LibraryFilter.FOLDERS to stringResource(R.string.filter_folders),
                 ),
                 currentValue = filterType,
                 onValueUpdate = {
@@ -65,6 +66,10 @@ fun LibraryScreen(navController: NavController) {
             LibraryFilter.DOWNLOADED -> LibraryDownloadedScreen(
                 navController,
                 { filterType = LibraryFilter.LIBRARY })
+
+            LibraryFilter.FOLDERS -> LibraryFoldersScreen(
+                onNavigateBack = { filterType = LibraryFilter.LIBRARY }
+            )
         }
     }
 }

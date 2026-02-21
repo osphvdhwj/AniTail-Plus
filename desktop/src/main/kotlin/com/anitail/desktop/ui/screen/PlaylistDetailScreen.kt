@@ -20,6 +20,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -253,8 +255,36 @@ fun PlaylistDetailScreen(
                                                 }
                                             }
 
-                                            IconButton(onClick = { /* TODO */ }) {
-                                                Icon(IconAssets.moreVert(), contentDescription = null)
+                                            var menuExpanded by remember { mutableStateOf(false) }
+                                            Box {
+                                                IconButton(onClick = { menuExpanded = true }) {
+                                                    Icon(IconAssets.moreVert(), contentDescription = null)
+                                                }
+
+                                                DropdownMenu(
+                                                    expanded = menuExpanded,
+                                                    onDismissRequest = { menuExpanded = false }
+                                                ) {
+                                                    DropdownMenuItem(
+                                                        text = { Text(stringResource("add_to_queue")) },
+                                                        onClick = {
+                                                            val songs = page.songs.map { songItemToLibraryItem(it) }
+                                                            playerState.addSongsToQueue(songs)
+                                                            menuExpanded = false
+                                                        },
+                                                        leadingIcon = { Icon(IconAssets.queueMusic(), null) }
+                                                    )
+                                                    if (page.playlist.id != "LM") {
+                                                        DropdownMenuItem(
+                                                            text = { Text(stringResource("share")) },
+                                                            onClick = {
+                                                                // TODO: Share
+                                                                menuExpanded = false
+                                                            },
+                                                            leadingIcon = { Icon(IconAssets.share(), null) }
+                                                        )
+                                                    }
+                                                }
                                             }
                                         }
                                     }
@@ -282,7 +312,13 @@ fun PlaylistDetailScreen(
                                     }
 
                                     page.playlist.radioEndpoint?.let {
-                                        OutlinedButton(onClick = { /* TODO */ }, contentPadding = ButtonDefaults.ButtonWithIconContentPadding, modifier = Modifier.weight(1f)) {
+                                        OutlinedButton(
+                                            onClick = {
+                                                // TODO: Implement radio logic
+                                            },
+                                            contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
+                                            modifier = Modifier.weight(1f)
+                                        ) {
                                             Icon(IconAssets.radio(), contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
                                             Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                                             Text(stringResource("radio"))
@@ -303,7 +339,7 @@ fun PlaylistDetailScreen(
                                 playerState.playQueue(songs, originalIndex)
                             },
                             onArtistClick = onArtistClick,
-                            onMoreClick = { /* TODO */ }
+                            onMoreClick = { /* Handled in item */ }
                         )
                     }
 
@@ -398,8 +434,33 @@ private fun YouTubeListItem(
             Text(text = formatDuration(duration), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
 
-        IconButton(onClick = onMoreClick) {
-            Icon(IconAssets.moreVert(), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        var songMenuExpanded by remember { mutableStateOf(false) }
+        Box {
+            IconButton(onClick = { songMenuExpanded = true }) {
+                Icon(IconAssets.moreVert(), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+
+            DropdownMenu(
+                expanded = songMenuExpanded,
+                onDismissRequest = { songMenuExpanded = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text(stringResource("play_next")) },
+                    onClick = {
+                        // Logic to play next (needs access to playerState or callback)
+                        songMenuExpanded = false
+                    },
+                    leadingIcon = { Icon(IconAssets.playlistPlay(), null) }
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource("add_to_queue")) },
+                    onClick = {
+                        // Logic to add to queue (needs access to playerState or callback)
+                        songMenuExpanded = false
+                    },
+                    leadingIcon = { Icon(IconAssets.queueMusic(), null) }
+                )
+            }
         }
     }
 }

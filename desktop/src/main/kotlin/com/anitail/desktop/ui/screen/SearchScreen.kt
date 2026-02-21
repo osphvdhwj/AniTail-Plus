@@ -23,6 +23,8 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -600,12 +602,39 @@ private fun SearchResultItem(
             )
         }
 
-        IconButton(onClick = { /* TODO: Context menu */ }) {
-            Icon(
-                IconAssets.moreVert(),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+        var showMenu by remember { mutableStateOf(false) }
+        Box {
+            IconButton(onClick = { showMenu = true }) {
+                Icon(
+                    IconAssets.moreVert(),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            DropdownMenu(
+                expanded = showMenu,
+                onDismissRequest = { showMenu = false }
+            ) {
+                if (item is SongItem) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource("play")) },
+                        onClick = {
+                            onClick()
+                            showMenu = false
+                        },
+                        leadingIcon = { Icon(IconAssets.play(), null) }
+                    )
+                }
+                // Generic open action for all types
+                DropdownMenuItem(
+                    text = { Text(stringResource("open")) },
+                    onClick = {
+                        onClick()
+                        showMenu = false
+                    },
+                    leadingIcon = { Icon(IconAssets.openInNew(), null) }
+                )
+            }
         }
     }
 }
