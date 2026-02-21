@@ -142,8 +142,8 @@ class DownloadLibraryRepository @Inject constructor(
             MediaStore.Audio.Media.SIZE,
             MediaStore.Audio.Media.DATE_ADDED
         )
-        val selection = "${MediaStore.Audio.Media.RELATIVE_PATH} LIKE ?"
-        val selectionArgs = arrayOf(mediaStoreHelper.anitailRelativePathLikeArg())
+        val selection = null // Query all music, not just Anitail folder
+        val selectionArgs = null
         val sortOrder = "${MediaStore.Audio.Media.DATE_ADDED} DESC"
 
         val collection = mediaStoreHelper.audioCollectionUri()
