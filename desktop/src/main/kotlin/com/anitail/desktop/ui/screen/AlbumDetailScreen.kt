@@ -3,6 +3,7 @@ package com.anitail.desktop.ui.screen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,6 +20,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -71,6 +74,7 @@ fun AlbumDetailScreen(
     var isLoading by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
     var isLiked by remember { mutableStateOf(false) }
+    var menuExpanded by remember { mutableStateOf(false) }
     val strings = LocalStrings.current
 
     LaunchedEffect(albumId) {
@@ -184,7 +188,7 @@ fun AlbumDetailScreen(
                                 }
 
                                 IconButton(
-                                    onClick = { /* TODO: Download */ }
+                                    onClick = { /* TODO: Implement download logic */ }
                                 ) {
                                     Icon(
                                         IconAssets.download(),
@@ -192,13 +196,38 @@ fun AlbumDetailScreen(
                                     )
                                 }
 
-                                IconButton(
-                                    onClick = { /* TODO: More menu */ }
-                                ) {
-                                    Icon(
-                                        IconAssets.moreVert(),
-                                        contentDescription = null,
-                                    )
+                                Box {
+                                    IconButton(
+                                        onClick = { menuExpanded = true }
+                                    ) {
+                                        Icon(
+                                            IconAssets.moreVert(),
+                                            contentDescription = null,
+                                        )
+                                    }
+
+                                    DropdownMenu(
+                                        expanded = menuExpanded,
+                                        onDismissRequest = { menuExpanded = false }
+                                    ) {
+                                        DropdownMenuItem(
+                                            text = { Text(stringResource("add_to_queue")) },
+                                            onClick = {
+                                                val songs = page.songs.map { songItemToLibraryItem(it) }
+                                                playerState.addSongsToQueue(songs)
+                                                menuExpanded = false
+                                            },
+                                            leadingIcon = { Icon(IconAssets.queueMusic(), null) }
+                                        )
+                                        DropdownMenuItem(
+                                            text = { Text(stringResource("share")) },
+                                            onClick = {
+                                                // TODO: Implement share
+                                                menuExpanded = false
+                                            },
+                                            leadingIcon = { Icon(IconAssets.share(), null) }
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -255,17 +284,42 @@ fun AlbumDetailScreen(
                 items = page.songs,
                 key = { _, song -> song.id }
             ) { index, song ->
-                SongListItem(
-                    song = song,
-                    albumIndex = index + 1,
-                    isActive = song.id == playerState.currentItem?.id,
-                    isPlaying = playerState.isPlaying,
-                    onClick = {
-                        val songs = page.songs.map { songItemToLibraryItem(it) }
-                        playerState.playQueue(songs, index)
-                    },
-                    onMoreClick = { /* TODO: Menu */ }
-                )
+                var songMenuExpanded by remember { mutableStateOf(false) }
+                Box {
+                    SongListItem(
+                        song = song,
+                        albumIndex = index + 1,
+                        isActive = song.id == playerState.currentItem?.id,
+                        isPlaying = playerState.isPlaying,
+                        onClick = {
+                            val songs = page.songs.map { songItemToLibraryItem(it) }
+                            playerState.playQueue(songs, index)
+                        },
+                        onMoreClick = { songMenuExpanded = true }
+                    )
+
+                    DropdownMenu(
+                        expanded = songMenuExpanded,
+                        onDismissRequest = { songMenuExpanded = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource("play_next")) },
+                            onClick = {
+                                playerState.addSongToQueue(songItemToLibraryItem(song))
+                                songMenuExpanded = false
+                            },
+                            leadingIcon = { Icon(IconAssets.playlistPlay(), null) }
+                        )
+                        DropdownMenuItem(
+                            text = { Text(stringResource("add_to_queue")) },
+                            onClick = {
+                                playerState.addSongToQueue(songItemToLibraryItem(song))
+                                songMenuExpanded = false
+                            },
+                            leadingIcon = { Icon(IconAssets.queueMusic(), null) }
+                        )
+                    }
+                }
             }
 
             // Otras versiones (si existen)

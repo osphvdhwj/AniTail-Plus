@@ -1451,7 +1451,9 @@ internal fun LegacyPrivacySettingsScreen(
                 text = { Text(stringResource("clear_listen_history_confirm")) },
                 confirmButton = {
                     TextButton(onClick = {
-                        // TODO: Clear history via database
+                        kotlinx.coroutines.GlobalScope.launch(Dispatchers.IO) {
+                            com.anitail.desktop.db.DesktopDatabase.getInstance().clearListenHistory()
+                        }
                         showClearHistoryDialog = false
                     }) {
                         Text(stringResource("delete"))
@@ -1472,7 +1474,9 @@ internal fun LegacyPrivacySettingsScreen(
                 text = { Text(stringResource("clear_search_history_confirm")) },
                 confirmButton = {
                     TextButton(onClick = {
-                        // TODO: Clear search history via database
+                        kotlinx.coroutines.GlobalScope.launch(Dispatchers.IO) {
+                            com.anitail.desktop.db.DesktopDatabase.getInstance().clearSearchHistory()
+                        }
                         showClearSearchDialog = false
                     }) {
                         Text(stringResource("delete"))
@@ -1545,7 +1549,9 @@ internal fun LegacyStorageSettingsScreen(
                 text = { Text(stringResource("clear_cache_confirm_desc")) },
                 confirmButton = {
                     TextButton(onClick = {
-                        // TODO: Clear cache
+                        kotlinx.coroutines.GlobalScope.launch(Dispatchers.IO) {
+                            com.anitail.desktop.utils.CacheUtils.clearCache()
+                        }
                         showClearCacheDialog = false
                     }) {
                         Text(stringResource("clear_cache"))
