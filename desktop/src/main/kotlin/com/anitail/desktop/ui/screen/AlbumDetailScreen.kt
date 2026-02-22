@@ -187,14 +187,17 @@ fun AlbumDetailScreen(
                                     )
                                 }
 
+                                // TODO: Implement download logic - temporarily disabled to avoid confusing users
+                                /*
                                 IconButton(
-                                    onClick = { /* TODO: Implement download logic */ }
+                                    onClick = {  }
                                 ) {
                                     Icon(
                                         IconAssets.download(),
                                         contentDescription = null,
                                     )
                                 }
+                                */
 
                                 Box {
                                     IconButton(

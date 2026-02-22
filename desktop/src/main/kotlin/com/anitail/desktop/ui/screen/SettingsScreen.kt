@@ -1431,6 +1431,7 @@ internal fun LegacyPrivacySettingsScreen(
         // Clear buttons
         var showClearHistoryDialog by remember { mutableStateOf(false) }
         var showClearSearchDialog by remember { mutableStateOf(false) }
+        val coroutineScope = rememberCoroutineScope()
 
         SettingsButton(
             title = stringResource("clear_listen_history"),
@@ -1451,7 +1452,7 @@ internal fun LegacyPrivacySettingsScreen(
                 text = { Text(stringResource("clear_listen_history_confirm")) },
                 confirmButton = {
                     TextButton(onClick = {
-                        kotlinx.coroutines.GlobalScope.launch(Dispatchers.IO) {
+                        coroutineScope.launch(Dispatchers.IO) {
                             com.anitail.desktop.db.DesktopDatabase.getInstance().clearListenHistory()
                         }
                         showClearHistoryDialog = false
@@ -1474,7 +1475,7 @@ internal fun LegacyPrivacySettingsScreen(
                 text = { Text(stringResource("clear_search_history_confirm")) },
                 confirmButton = {
                     TextButton(onClick = {
-                        kotlinx.coroutines.GlobalScope.launch(Dispatchers.IO) {
+                        coroutineScope.launch(Dispatchers.IO) {
                             com.anitail.desktop.db.DesktopDatabase.getInstance().clearSearchHistory()
                         }
                         showClearSearchDialog = false
@@ -1535,6 +1536,7 @@ internal fun LegacyStorageSettingsScreen(
         Divider(modifier = Modifier.padding(vertical = 8.dp))
 
         var showClearCacheDialog by remember { mutableStateOf(false) }
+        val coroutineScope = rememberCoroutineScope()
 
         SettingsButton(
             title = stringResource("clear_cache"),
@@ -1549,7 +1551,7 @@ internal fun LegacyStorageSettingsScreen(
                 text = { Text(stringResource("clear_cache_confirm_desc")) },
                 confirmButton = {
                     TextButton(onClick = {
-                        kotlinx.coroutines.GlobalScope.launch(Dispatchers.IO) {
+                        coroutineScope.launch(Dispatchers.IO) {
                             com.anitail.desktop.utils.CacheUtils.clearCache()
                         }
                         showClearCacheDialog = false

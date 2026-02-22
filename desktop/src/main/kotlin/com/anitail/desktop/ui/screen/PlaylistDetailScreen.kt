@@ -197,7 +197,29 @@ fun PlaylistDetailScreen(
                             playerState.playQueue(songs, originalIndex)
                         },
                         onArtistClick = onArtistClick,
-                        onMoreClick = { /* TODO */ }
+                            onMoreClick = { /* TODO */ },
+                            onPlayNext = {
+                                val libraryItem = LibraryItem(
+                                    id = song.id,
+                                    title = song.title,
+                                    artist = song.artistName ?: "",
+                                    artworkUrl = song.thumbnailUrl,
+                                    playbackUrl = song.id,
+                                    durationMs = song.duration.takeIf { it > 0 }?.toLong()
+                                )
+                                playerState.addSongToQueue(libraryItem)
+                            },
+                            onAddToQueue = {
+                                val libraryItem = LibraryItem(
+                                    id = song.id,
+                                    title = song.title,
+                                    artist = song.artistName ?: "",
+                                    artworkUrl = song.thumbnailUrl,
+                                    playbackUrl = song.id,
+                                    durationMs = song.duration.takeIf { it > 0 }?.toLong()
+                                )
+                                playerState.addSongToQueue(libraryItem)
+                            }
                     )
                 }
 
@@ -339,7 +361,13 @@ fun PlaylistDetailScreen(
                                 playerState.playQueue(songs, originalIndex)
                             },
                             onArtistClick = onArtistClick,
-                            onMoreClick = { /* Handled in item */ }
+                            onMoreClick = { /* Handled in item */ },
+                            onPlayNext = {
+                                playerState.addSongToQueue(songItemToLibraryItem(song))
+                            },
+                            onAddToQueue = {
+                                playerState.addSongToQueue(songItemToLibraryItem(song))
+                            }
                         )
                     }
 
@@ -399,6 +427,8 @@ private fun YouTubeListItem(
     onClick: () -> Unit,
     onArtistClick: (String, String) -> Unit,
     onMoreClick: () -> Unit,
+    onPlayNext: () -> Unit,
+    onAddToQueue: () -> Unit,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -447,7 +477,7 @@ private fun YouTubeListItem(
                 DropdownMenuItem(
                     text = { Text(stringResource("play_next")) },
                     onClick = {
-                        // Logic to play next (needs access to playerState or callback)
+                        onPlayNext()
                         songMenuExpanded = false
                     },
                     leadingIcon = { Icon(IconAssets.playlistPlay(), null) }
@@ -455,7 +485,7 @@ private fun YouTubeListItem(
                 DropdownMenuItem(
                     text = { Text(stringResource("add_to_queue")) },
                     onClick = {
-                        // Logic to add to queue (needs access to playerState or callback)
+                        onAddToQueue()
                         songMenuExpanded = false
                     },
                     leadingIcon = { Icon(IconAssets.queueMusic(), null) }
