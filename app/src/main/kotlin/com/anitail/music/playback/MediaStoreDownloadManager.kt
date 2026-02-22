@@ -234,15 +234,15 @@ constructor(
         if (uniqueSongIds.isEmpty()) return
 
         scope.launch {
-            val songsToRetry = mutableListOf<Song>()
+            val songsToRetry = database.songsByIds(uniqueSongIds.toList())
 
-            uniqueSongIds.forEach { songId ->
-                val song = database.song(songId).first()
-                if (song == null) {
-                    Timber.Forest.e("Song not found in database: $songId")
-                    return@forEach
+            if (songsToRetry.size < uniqueSongIds.size) {
+                val foundIds = songsToRetry.map { it.id }.toSet()
+                uniqueSongIds.forEach { songId ->
+                    if (songId !in foundIds) {
+                        Timber.Forest.e("Song not found in database: $songId")
+                    }
                 }
-                songsToRetry += song
             }
 
             if (songsToRetry.isNotEmpty()) {
@@ -1024,7 +1024,7 @@ constructor(
             return
         }
 
-        val song = database.song(songId).first()
+        val song = database.getSongById(songId)
         if (song != null) {
             val isMediaStoreUri = isMediaStoreContentUri(persistedUri)
             database.query {
@@ -1082,7 +1082,7 @@ constructor(
         sourceMediaStoreUri: String?
     ): Boolean {
         if (!customDownloadPathEnabled || customDownloadPathUri.isBlank()) return true
-        val existingSong = database.song(songId).first()?.song
+        val existingSong = database.getSongById(songId)?.song
         val existingDownloadUri = existingSong?.downloadUri
         val alreadyOnCustomUri =
             !existingDownloadUri.isNullOrBlank() &&
@@ -1112,7 +1112,7 @@ constructor(
         customUri: String,
         previousMediaStoreUri: String?,
     ) {
-        val song = database.song(songId).first() ?: return
+        val song = database.getSongById(songId) ?: return
         val currentPrimaryUri = song.song.mediaStoreUri
         if (currentPrimaryUri != null && currentPrimaryUri != customUri) {
             deletePersistedUri(currentPrimaryUri)
