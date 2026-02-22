@@ -38,12 +38,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.anitail.desktop.ui.IconAssets
 import androidx.compose.ui.unit.sp
@@ -57,6 +59,8 @@ import com.anitail.desktop.YouTube
 import com.anitail.innertube.models.SongItem
 import com.anitail.innertube.pages.AlbumPage
 import com.anitail.shared.model.LibraryItem
+import java.awt.Desktop
+import java.net.URI
 
 /**
  * Pantalla de detalle de álbum para Desktop - Idéntica a Android.
@@ -76,6 +80,7 @@ fun AlbumDetailScreen(
     var isLiked by remember { mutableStateOf(false) }
     var menuExpanded by remember { mutableStateOf(false) }
     val strings = LocalStrings.current
+    val clipboardManager = LocalClipboardManager.current
 
     LaunchedEffect(albumId) {
         isLoading = true
@@ -222,10 +227,21 @@ fun AlbumDetailScreen(
                                         DropdownMenuItem(
                                             text = { Text(stringResource("share")) },
                                             onClick = {
-                                                // TODO: Implement share
+                                                clipboardManager.setText(AnnotatedString(page.album.shareLink))
                                                 menuExpanded = false
                                             },
                                             leadingIcon = { Icon(IconAssets.share(), null) }
+                                        )
+                                        DropdownMenuItem(
+                                            text = { Text(stringResource("open_in_browser")) },
+                                            onClick = {
+                                                runCatching {
+                                                    val uri = URI(page.album.shareLink)
+                                                    Desktop.getDesktop().browse(uri)
+                                                }
+                                                menuExpanded = false
+                                            },
+                                            leadingIcon = { Icon(IconAssets.openInNew(), null) }
                                         )
                                     }
                                 }
